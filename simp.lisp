@@ -1,4 +1,19 @@
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The following Lisp code implements a basic algebra system. Vector algebra expressions can be expanded and simplified. ;;
+;; 															 ;;
+;; m+    ..  add two matrices												 ;;
+;; m/s   ..  divide each matrix element by the scalar s									 ;;
+;; m*v   ..  matrix vector product											 ;;
+;; elt2  ..  access matrix element (row, column)									 ;;
+;; m*    ..  3x3 matrix-matrix product											 ;;
+;; eps   ..  epsilon tensor (used in definition of cross product)							 ;;
+;; cross ..  cross product of 3 vectors											 ;;
+;; dotv  ..  dot product of 3 vectors											 ;;
+;; simp  ..  simplify an expression (iterates 12 times by default)							 ;;
+;; skew-sym-cross .. construct a skew symmetric matrix from 3 vector (used in quaternion conversion)			 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun m+ (a b)
   (loop for ra in a and rb in b collect
        (loop for ca in ra and cb in rb collect
@@ -300,3 +315,4 @@
 	    (m/s (m* sv sv)
 		 `(+ 1 ,c)))))
    (m*v m sys-vec)))
+
