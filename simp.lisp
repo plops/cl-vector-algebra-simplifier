@@ -7,6 +7,7 @@
 ;; m*v   ..  matrix vector product											 ;;
 ;; elt2  ..  access matrix element (row, column)									 ;;
 ;; m*    ..  3x3 matrix-matrix product											 ;;
+;; m2inv ..  invert 2x2 matrix
 ;; eps   ..  epsilon tensor (used in definition of cross product)							 ;;
 ;; cross ..  cross product of 3 vectors											 ;;
 ;; dotv  ..  dot product of 3 vectors											 ;;
@@ -32,8 +33,9 @@
 	    `(/ ,ca ,s))))
 
 (defun m*v (a v)
-  (loop for i below 3 collect
-       `(+ ,@(loop for j below 3 collect
+  (assert (= (length (elt a 0)) (length v)))
+  (loop for i below (length a) collect
+       `(+ ,@(loop for j below (length v) collect
 		  `(* ,(elt2 a  i j) ,(elt v j))))))
 
 #+nil
