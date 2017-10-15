@@ -4,6 +4,7 @@
 ;; 															 ;;
 ;; m+    ..  add two matrices												 ;;
 ;; m/s   ..  divide each matrix element by the scalar s									 ;;
+;; m*s   ..  multiply each matrix element by the scalar s									 ;;
 ;; m*v   ..  matrix vector product											 ;;
 ;; elt2  ..  access matrix element (row, column)									 ;;
 ;; m*    ..  3x3 matrix-matrix product											 ;;
@@ -41,6 +42,10 @@
   (loop for ra in a and rb in b collect
        (loop for ca in ra and cb in rb collect
 	    `(+ ,ca ,cb))))
+(defun m- (a b)
+  (loop for ra in a and rb in b collect
+       (loop for ca in ra and cb in rb collect
+	    `(- ,ca ,cb))))
 #+nil
 (m+ '((1 2 3)
       (4 5 6)
@@ -53,6 +58,10 @@
   (loop for ra in a collect
        (loop for ca in ra collect
 	    `(/ ,ca ,s))))
+(defun m*s (a s)
+  (loop for ra in a collect
+       (loop for ca in ra collect
+	    `(* ,ca ,s))))
 
 (defun det2 (aa)
   (assert (= (length aa) 2))
