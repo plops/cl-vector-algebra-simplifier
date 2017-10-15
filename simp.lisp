@@ -95,7 +95,7 @@
   (assert (= (length (first a)) (length b)))
   (loop for i below (length (first a)) collect
        (loop for j below (length b) collect
-	    `(+ ,@(loop for k below 3 collect
+	    `(+ ,@(loop for k below (length (first b)) collect
 		       `(* ,(elt2 a i k)
 			   ,(elt2 b k j)))))))
 
