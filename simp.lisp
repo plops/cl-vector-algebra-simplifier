@@ -15,6 +15,27 @@
 ;; skew-sym-cross .. construct a skew symmetric matrix from 3 vector (used in quaternion conversion)			 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+(defun v+ (a b)
+  (loop for ra in a and rb in b collect
+       `(+ ,ra ,rb)))
+
+(defun v- (a b)
+  (loop for ra in a and rb in b collect
+       `(- ,ra ,rb)))
+
+(defun elt2 (a i j)
+  (elt (elt a i) j))
+
+#+nil
+(elt2
+ '((1 2 3)
+   (4 5 6)
+   (7 8 9))
+ 0 2)
+
+
+
 (defun m+ (a b)
   (loop for ra in a and rb in b collect
        (loop for ca in ra and cb in rb collect
@@ -33,7 +54,7 @@
 	    `(/ ,ca ,s))))
 
 (defun m*v (a v)
-  (assert (= (length (elt a 0)) (length v)))
+  (assert (= (length (first a)) (length v)))
   (loop for i below (length a) collect
        `(+ ,@(loop for j below (length v) collect
 		  `(* ,(elt2 a  i j) ,(elt v j))))))
@@ -45,19 +66,10 @@
      '(x y z))
 
 
-(defun elt2 (a i j)
-  (elt (elt a i) j))
-
-#+nil
-(elt2
- '((1 2 3)
-   (4 5 6)
-   (7 8 9))
- 0 2)
-
 (defun m* (a b)
-  (loop for i below 3 collect
-       (loop for j below 3 collect
+  (assert (= (length (first a)) (length b)))
+  (loop for i below (length (first a)) collect
+       (loop for j below (length b) collect
 	    `(+ ,@(loop for k below 3 collect
 		       `(* ,(elt2 a i k)
 			   ,(elt2 b k j)))))))
@@ -97,6 +109,8 @@
 
 
 (defun cross (u v)
+  (assert (= 3 (length u)))
+  (assert (= 3 (length v)))
   (loop for i below 3 collect
        `(+ ,@(loop for j below 3 collect
 		  `(+ ,@(loop for k below 3 collect
@@ -105,7 +119,8 @@
 (cross '(1 0 0) '(0 1 x))
 
 (defun dotv (u v)
-  `(+ ,@(loop for i below 3 collect
+  (assert (= (length u) (length v)))
+  `(+ ,@(loop for i below (length u) collect
 	     `(* ,(elt u i) ,(elt v i)))))
 
 #+nil
@@ -202,48 +217,28 @@
     
     (t expr)))
 
+(defun skew-sym-cross (a)
+  (let ((u (elt a 0))
+	(v (elt a 1))
+	(w (elt a 2))) 
+    `((0 (- ,w) ,v)
+      (,w 0 (- ,u))
+      ((- ,v) ,u 0))))
 
 #+nil
-(simp :n 100 :expr
-      (rotate-on-chief '(cx cy cz) '(x y z)))
+(skew-sym-cross '(1 2 3))
 
-#+nil
-(let ((cx 1)
-      (cy 3)
-      (cz 5)
-      (x 7)
-      (y 11)
-      (z 13))
-  (list #.(first (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-	#.(first (rotate-on-chief '(cx cy cz) '(x y z)))
-	#.(second (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-	#.(second (rotate-on-chief '(cx cy cz) '(x y z)))
-	#.(third (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-	#.(third (rotate-on-chief '(cx cy cz) '(x y z)))
-	))
+(defun simplify (exp)
+  (if (atom exp)
+      exp
+      (simplify-expr (mapcar #'simplify exp))))
 
-#+nil
-(let* ((alpha (* (/ 180) pi 30))
-       (cx (sin alpha))
-       (cy 0)
-       (cz (cos alpha))
-       (x cx)
-       (y cy)
-       (z cz))
-  
-  
-  (list #.(first (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-	#.(second (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-
-	#.(third (simp :n 100 :expr
-		       (rotate-on-chief '(cx cy cz) '(x y z))))
-	#.(first (simp :n 100 :expr
-		    (rotate-on-chief-m '(cx cy cz))))))
+(defun simp (&key expr (n 12))
+  (let* ((old-expr expr))
+    (loop for i below n do
+	 (setf old-expr expr
+	       expr (simplify expr)))
+    expr))
 
 
 #+nil
@@ -267,41 +262,7 @@
 	(m*v m b)))
 
 
-(defun simplify (exp)
-  
-  (if (atom exp)
-      exp
-      (simplify-expr (mapcar #'simplify exp))))
-
-(defun simp (&key expr (n 12))
-  (let* ((old-expr expr))
-    (loop for i below n do
-	 (setf old-expr expr
-	       expr (simplify expr)))
-    expr))
-
-
 #+nil
-(mapcar #'simp
-	'((/ 0 x)
-	  (/ x 1)
-	  (* 1 x)
-	  (* x 1)
-	  (+ 0 x)
-	  (- 0 1)
-	  (- 1 0)))
-
-(defun skew-sym-cross (a)
-  (let ((u (elt a 0))
-	(v (elt a 1))
-	(w (elt a 2))) 
-    `((0 (- ,w) ,v)
-      (,w 0 (- ,u))
-      ((- ,v) ,u 0))))
-
-#+nil
-(skew-sym-cross '(1 2 3))
-
 (defun rotate-system-so-axis-aligns-with-vector (vector sys-vec &key (axis '(0 0 1)) )
   ;; rotate a on b
  (let* ((a axis)
