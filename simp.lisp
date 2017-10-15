@@ -7,6 +7,7 @@
 ;; m*v   ..  matrix vector product											 ;;
 ;; elt2  ..  access matrix element (row, column)									 ;;
 ;; m*    ..  3x3 matrix-matrix product											 ;;
+;; det2  ..  determinant of 2x2 matrix
 ;; m2inv ..  invert 2x2 matrix
 ;; eps   ..  epsilon tensor (used in definition of cross product)							 ;;
 ;; cross ..  cross product of 3 vectors											 ;;
@@ -52,6 +53,30 @@
   (loop for ra in a collect
        (loop for ca in ra collect
 	    `(/ ,ca ,s))))
+
+(defun det2 (aa)
+  (assert (= (length aa) 2))
+  (assert (= (length (first aa)) 2))
+  (let ((a (elt2 aa 0 0))
+	(b (elt2 aa 0 1))
+	(c (elt2 aa 1 0))
+	(d (elt2 aa 1 1)))
+    `(- (* ,a ,d) (* ,b ,c))))
+
+(defun m2inv (aa)
+  (assert (= (length aa) 2))
+  (assert (= (length (first aa)) 2))
+  (let ((a (elt2 aa 0 0))
+	(b (elt2 aa 0 1))
+	(c (elt2 aa 1 0))
+	(d (elt2 aa 1 1)))
+    (m/s (list (list d (- b))
+	       (list (- c) a)) (det2 aa))))
+
+#+nil
+(simp :expr (m2inv (list (list 1 2)
+	      (list 3 4))))
+
 
 (defun m*v (a v)
   (assert (= (length (first a)) (length v)))
@@ -105,7 +130,6 @@
 	 (= (elt rest 2) (elt rest 0)))
      0)
     (t (break "unexpected input"))))
-
 
 
 (defun cross (u v)
