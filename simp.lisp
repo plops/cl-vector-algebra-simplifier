@@ -79,8 +79,9 @@
 	(b (elt2 aa 0 1))
 	(c (elt2 aa 1 0))
 	(d (elt2 aa 1 1)))
-    (m/s (list (list d (- b))
-	       (list (- c) a)) (det2 aa))))
+    (m/s (list (list d `(- ,b))
+	       (list `(- ,c) a))
+	 (det2 aa))))
 
 #+nil
 (simp :expr (m2inv (list (list 1 2)
